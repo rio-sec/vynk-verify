@@ -1,1 +1,2 @@
-worker: python working_bot_api.py
+web: python web_dashboard.py
+worker: python bot.py
