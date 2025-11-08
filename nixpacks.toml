@@ -1,8 +1,13 @@
 [phases.setup]
-cmds = ["apt-get update && apt-get install -y python3-pip"]
+commands = [
+    "python3 -m venv /opt/venv",
+    ". /opt/venv/bin/activate",
+    "pip install --upgrade pip",
+    "pip install -r requirements.txt"
+]
 
-[phases.install]
-cmds = ["pip install -r requirements.txt"]
+[phases.setup.environment]
+PATH="/opt/venv/bin:${PATH}"
 
 [start]
-cmd = "python web_dashboard.py & python bot.py"
+cmd = "python working_bot_api.py"
