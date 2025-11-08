@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - VYNK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0F172A; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        .stat-card { background: linear-gradient(135deg, #1E293B 0%, #334155 100%); }
+        .gradient-text { background: linear-gradient(135deg, #3B82F6 0%, #22D3EE 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Navigation -->
+    <nav class="glass border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg"></div>
+                    <span class="text-lg font-bold">VYNK Dashboard</span>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <a href="/" class="hover:text-blue-400">Home</a>
+                    <a href="/dashboard" class="text-blue-400 font-semibold">Dashboard</a>
+                    <a href="#" class="hover:text-blue-400">Settings</a>
+                    <a href="#" class="hover:text-blue-400">Analytics</a>
+                </div>
+
+                <!-- User Info Section -->
+                <div class="flex items-center space-x-4">
+                    {% if user %}
+                    <div class="flex items-center space-x-3">
+                        {% if user.avatar %}
+                        <img src="https://cdn.discordapp.com/avatars/{{ user.user_id }}/{{ user.avatar }}.png" 
+                             class="w-8 h-8 rounded-full">
+                        {% else %}
+                        <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                            <span class="text-white text-sm">{{ user.username[0] }}</span>
+                        </div>
+                        {% endif %}
+                        <span class="text-gray-300">Welcome, {{ user.username }}</span>
+                        <a href="/logout" class="text-gray-400 hover:text-white text-sm">Logout</a>
+                    </div>
+                    {% else %}
+                    <a href="/login" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg font-semibold transition-colors">
+                        Login with Discord
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Server Selector and Welcome -->
+        <div class="mb-8">
+            {% if user %}
+                {% if guilds and guilds|length > 0 %}
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold gradient-text">Server Dashboard</h1>
+                        <p class="text-gray-400">Manage your Discord server verification settings</p>
+                    </div>
+                    
+                    <!-- Server Selector -->
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-400 text-sm">Managing:</span>
+                        <select class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white" onchange="changeServer(this.value)">
+                            {% for guild in guilds %}
+                            <option value="{{ guild.id }}" {% if guild.id == current_guild.id %}selected{% endif %}>
+                                {{ guild.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-12">
+                    <div class="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-gray-400 text-2xl">🛡️</span>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">No Admin Servers Found</h2>
+                    <p class="text-gray-400 mb-6">You need administrator permissions in at least one server to use this dashboard.</p>
+                    <a href="https://discord.com/oauth2/authorize?client_id={{ DISCORD_CLIENT_ID }}&permissions=8&scope=bot%20applications.commands" 
+                       class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg font-semibold transition-colors">
+                        Add VYNK to Your Server
+                    </a>
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="text-center py-12">
+                <h1 class="text-4xl font-bold mb-4 gradient-text">VYNK Dashboard</h1>
+                <p class="text-gray-400 text-lg mb-8">Please login with Discord to manage your server settings</p>
+                <a href="/login" class="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors">
+                    Login with Discord
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if user and guilds and guilds|length > 0 %}
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Verifications -->
+            <div class="stat-card rounded-xl p-6 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Verifications</p>
+                        <p class="text-3xl font-bold">{{ stats.total_verifications }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white">📈</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Rate -->
+            <div class="stat-card rounded-xl p-6 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Success Rate</p>
+                        <p class="text-3xl font-bold text-green-400">{{ stats.success_rate }}%</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white">✅</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent (24h) -->
+            <div class="stat-card rounded-xl p-6 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Last 24 Hours</p>
+                        <p class="text-3xl font-bold">{{ stats.recent_verifications }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-cyan-400 rounded-lg flex items-center justify-center">
+                        <span class="text-white">🕐</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failed -->
+            <div class="stat-card rounded-xl p-6 border border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Failed Attempts</p>
+                        <p class="text-3xl font-bold text-red-400">{{ stats.failed_verifications }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white">❌</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Verifications -->
+            <div class="glass rounded-xl p-6 border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4">Recent Verifications</h3>
+                <div class="space-y-3 max-h-96 overflow-y-auto">
+                    {% if recent_verifications %}
+                        {% for verification in recent_verifications %}
+                        <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                            <div>
+                                <p class="font-medium">{{ verification.user_name }}</p>
+                                <p class="text-sm text-gray-400">{{ verification.method }} • {{ verification.timestamp[:16] }}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold {% if verification.status == 'success' %}bg-green-500/20 text-green-400{% else %}bg-red-500/20 text-red-400{% endif %}">
+                                {{ verification.status }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-8 text-gray-500">
+                            <p>No verification data available yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Server Settings -->
+            <div class="glass rounded-xl p-6 border border-gray-700">
+                <h3 class="text-xl font-semibold mb-4">Server Configuration</h3>
+                {% if settings %}
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm text-gray-400">Verification Method</label>
+                        <p class="font-medium">{{ settings.method|title }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">Verified Role ID</label>
+                        <p class="font-medium">{{ settings.verified_role }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-400">Log Channel ID</label>
+                        <p class="font-medium">{{ settings.log_channel or 'Not set' }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-8 text-gray-500">
+                    <p class="mb-4">No server configuration found.</p>
+                    <p class="text-sm">Use <code class="bg-gray-800 px-2 py-1 rounded">/setup-verification</code> in Discord to get started.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="glass rounded-xl p-6 border border-gray-700 mt-8">
+            <h3 class="text-xl font-semibold mb-4">Quick Actions</h3>
+            <div class="flex flex-wrap gap-4">
+                <button onclick="exportLogs()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg font-semibold transition-colors">
+                    Export Logs
+                </button>
+                <button onclick="refreshData()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition-colors">
+                    Refresh Data
+                </button>
+                <button onclick="syncWithDiscord()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg font-semibold transition-colors">
+                    Sync with Discord
+                </button>
+                <a href="https://discord.com/channels/{{ current_guild.id }}" 
+                   target="_blank" 
+                   class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded-lg font-semibold transition-colors">
+                    Open Server
+                </a>
+            </div>
+        </div>
+
+        <!-- Bot Setup Instructions -->
+        <div class="glass rounded-xl p-6 border border-gray-700 mt-8">
+            <h3 class="text-xl font-semibold mb-4">Bot Setup Instructions</h3>
+            <div class="space-y-4">
+                <div class="flex items-start space-x-3">
+                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                        <span class="text-white text-sm">1</span>
+                    </div>
+                    <div>
+                        <p class="font-medium">Invite VYNK to your server</p>
+                        <p class="text-gray-400 text-sm">Use the invite link with administrator permissions</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                        <span class="text-white text-sm">2</span>
+                    </div>
+                    <div>
+                        <p class="font-medium">Configure verification</p>
+                        <p class="text-gray-400 text-sm">Use <code class="bg-gray-800 px-1 rounded">/setup-verification</code> in your server</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-1 flex-shrink-0">
+                        <span class="text-white text-sm">3</span>
+                    </div>
+                    <div>
+                        <p class="font-medium">Monitor analytics</p>
+                        <p class="text-gray-400 text-sm">Use this dashboard to track verification metrics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 py-8 mt-12">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <div class="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-400 rounded"></div>
+                    <span class="font-bold">VYNK</span>
+                </div>
+                <div class="text-gray-400 text-sm text-center md:text-right">
+                    <p>&copy; 2024 VYNK Verification System. Developed by rio-sec.</p>
+                    <p class="mt-1">Premium Discord verification with advanced analytics and security.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            if (window.location.pathname === '/dashboard') {
+                window.location.reload();
+            }
+        }, 30000);
+
+        function changeServer(guildId) {
+            // In a real implementation, this would update the dashboard for the selected server
+            window.location.href = `/dashboard?guild=${guildId}`;
+        }
+
+        function exportLogs() {
+            alert('Export functionality will be implemented soon!');
+        }
+
+        function refreshData() {
+            window.location.reload();
+        }
+
+        function syncWithDiscord() {
+            alert('Syncing with Discord... This may take a few moments.');
+            // In a real implementation, this would sync data with Discord
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+
+        // Initialize any charts or dynamic content here
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('VYNK Dashboard loaded successfully');
+            
+            // Add any additional initialization code here
+            if (typeof Chart !== 'undefined') {
+                // Initialize charts if needed
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify - VYNK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0F172A; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        .gradient-bg { background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); }
+        .success-gradient { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="text-white gradient-bg min-h-screen">
+    <!-- Header -->
+    <nav class="glass border-b border-gray-800">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg"></div>
+                    <span class="text-lg font-bold">VYNK Verification</span>
+                </div>
+                <div class="text-sm text-gray-400">
+                    Secure Identity Verification
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-12">
+        <div class="max-w-2xl mx-auto">
+            <!-- Progress Steps -->
+            <div class="flex justify-between items-center mb-12">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-white font-bold">1</span>
+                    </div>
+                    <p class="text-sm text-blue-400 font-semibold">Start</p>
+                </div>
+                <div class="flex-1 h-1 bg-gray-700 mx-4"></div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-gray-400 font-bold">2</span>
+                    </div>
+                    <p class="text-sm text-gray-400">Verify</p>
+                </div>
+                <div class="flex-1 h-1 bg-gray-700 mx-4"></div>
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-gray-400 font-bold">3</span>
+                    </div>
+                    <p class="text-sm text-gray-400">Complete</p>
+                </div>
+            </div>
+
+            <!-- Verification Card -->
+            <div class="glass rounded-2xl p-8 border border-gray-700 shadow-2xl">
+                <div class="text-center mb-8">
+                    <h1 class="text-3xl font-bold mb-4">Server Verification</h1>
+                    <p class="text-gray-400 text-lg">Complete verification to access the server</p>
+                </div>
+
+                <!-- Security Info -->
+                <div class="bg-gray-800 rounded-xl p-6 mb-8">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <span class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-2">
+                            <span class="text-white text-sm">✓</span>
+                        </span>
+                        Security Check
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-400">IP Address:</span>
+                            <span class="font-mono">{{ geolocation_data.ip_address }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Location:</span>
+                            <span>{{ geolocation_data.city }}, {{ geolocation_data.country }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">ISP:</span>
+                            <span>{{ geolocation_data.isp }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">VPN Detected:</span>
+                            <span class="{% if geolocation_data.vpn_detected %}text-red-400{% else %}text-green-400{% endif %}">
+                                {{ "Yes" if geolocation_data.vpn_detected else "No" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification Methods -->
+                <div class="space-y-4 mb-8">
+                    <h3 class="text-lg font-semibold mb-4">Select Verification Method</h3>
+                    
+                    <!-- Simple Verify Button -->
+                    <div class="border border-gray-700 rounded-xl p-6 hover:border-blue-500 transition-colors cursor-pointer verification-option" data-method="simple">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                    <span class="text-blue-400 text-xl">✓</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Simple Verification</h4>
+                                    <p class="text-gray-400 text-sm">One-click verification for trusted users</p>
+                                </div>
+                            </div>
+                            <div class="text-blue-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CAPTCHA Method -->
+                    <div class="border border-gray-700 rounded-xl p-6 hover:border-cyan-400 transition-colors cursor-pointer verification-option" data-method="captcha">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-cyan-500/20 rounded-lg flex items-center justify-center">
+                                    <span class="text-cyan-400 text-xl">🛡️</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">CAPTCHA Challenge</h4>
+                                    <p class="text-gray-400 text-sm">Image-based verification for security</p>
+                                </div>
+                            </div>
+                            <div class="text-cyan-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Method -->
+                    <div class="border border-gray-700 rounded-xl p-6 hover:border-green-500 transition-colors cursor-pointer verification-option" data-method="quiz">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                    <span class="text-green-400 text-xl">❓</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Server Quiz</h4>
+                                    <p class="text-gray-400 text-sm">Answer questions about the server</p>
+                                </div>
+                            </div>
+                            <div class="text-green-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simple Verification Content (Initially Hidden) -->
+                <div id="simple-verify" class="hidden">
+                    <div class="text-center py-8">
+                        <div class="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4 pulse">
+                            <span class="text-blue-400 text-2xl">✓</span>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Ready to Verify?</h3>
+                        <p class="text-gray-400 mb-6">Click the button below to complete verification</p>
+                        <button id="verify-button" class="bg-blue-500 hover:bg-blue-600 px-8 py-4 rounded-xl font-semibold text-lg transition-colors w-full max-w-xs">
+                            Verify Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="hidden text-center py-8">
+                    <div class="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <h3 class="text-xl font-semibold mb-2">Completing Verification</h3>
+                    <p class="text-gray-400">Please wait while we verify your identity...</p>
+                </div>
+
+                <!-- Success State -->
+                <div id="success-state" class="hidden text-center py-8">
+                    <div class="w-20 h-20 success-gradient rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-white text-2xl">🎉</span>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-2 text-green-400">Verification Complete!</h3>
+                    <p class="text-gray-400 mb-6">You can now return to Discord and access the server</p>
+                    <div class="bg-green-500/20 border border-green-500/30 rounded-xl p-4 max-w-md mx-auto">
+                        <p class="text-green-400 text-sm">Role assigned successfully. Welcome to the community!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="text-center mt-8 text-gray-500 text-sm">
+                <p>Powered by VYNK Premium Verification • Secured by Abstract API</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables from server-side data
+        const sessionId = "{{ session_id }}";
+        const userId = "{{ user_id }}";
+        const guildId = "{{ guild_id }}";
+        const geolocationData = JSON.parse('{{ geolocation_data | tojson | safe }}');
+
+        console.log("🔧 Verification Portal Loaded:", { sessionId, userId, guildId, geolocationData });
+
+        // Handle verification method selection
+        document.querySelectorAll('.verification-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const method = this.dataset.method;
+                console.log("🎯 Selected verification method:", method);
+                
+                if (method === 'simple') {
+                    document.getElementById('simple-verify').classList.remove('hidden');
+                    // Hide other method options
+                    document.querySelectorAll('.verification-option').forEach(opt => {
+                        if (opt !== this) opt.style.display = 'none';
+                    });
+                }
+            });
+        });
+
+        // Call Discord API to assign role (DIRECT METHOD - no bot API server)
+        async function notifyDiscordBot() {
+            try {
+                console.log(`🔄 Assigning role via direct API for user ${userId} in guild ${guildId}`);
+                console.log("🌍 Geolocation data:", geolocationData);
+                
+                const response = await fetch('/api/discord/assign-role', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        guild_id: guildId,
+                        user_id: userId,
+                        geolocation_data: geolocationData
+                    })
+                });
+
+                const result = await response.json();
+                console.log("🎯 Direct API Response:", result);
+                
+                if (result.success) {
+                    console.log('✅ Role assigned successfully via direct API');
+                    return true;
+                } else {
+                    console.error('❌ Failed to assign role via direct API:', result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error calling direct API:', error);
+                return false;
+            }
+        }
+
+        // Handle verification button click
+        document.getElementById('verify-button').addEventListener('click', async function() {
+            console.log("🎯 Verify button clicked");
+            
+            // Show loading state
+            document.getElementById('simple-verify').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+
+            try {
+                console.log("📡 Calling web dashboard API...");
+                const response = await fetch('/api/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        user_id: userId,
+                        guild_id: guildId
+                    })
+                });
+
+                const data = await response.json();
+                console.log("🌐 Web API Response:", data);
+
+                if (data.success) {
+                    console.log("✅ Web verification successful, assigning role...");
+                    
+                    // Call bot API to assign role
+                    const roleAssigned = await notifyDiscordBot();
+                    
+                    if (roleAssigned) {
+                        console.log("✅ All verification steps completed successfully");
+                        // Show success state
+                        setTimeout(() => {
+                            document.getElementById('loading-state').classList.add('hidden');
+                            document.getElementById('success-state').classList.remove('hidden');
+                        }, 1500);
+                    } else {
+                        throw new Error('Failed to assign Discord role. Please contact server admin.');
+                    }
+                } else {
+                    throw new Error(data.error || 'Verification failed');
+                }
+            } catch (error) {
+                console.error('❌ Verification error:', error);
+                document.getElementById('loading-state').classList.add('hidden');
+                
+                // Show error state
+                const errorHtml = `
+                    <div class="text-center py-8">
+                        <div class="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-red-400 text-2xl">❌</span>
+                        </div>
+                        <h3 class="text-2xl font-semibold mb-2 text-red-400">Verification Failed</h3>
+                        <p class="text-gray-400 mb-6">${error.message || 'Please try again or contact server admin.'}</p>
+                        <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg font-semibold transition-colors">
+                            Try Again
+                        </button>
+                    </div>
+                `;
+                document.getElementById('simple-verify').innerHTML = errorHtml;
+                document.getElementById('simple-verify').classList.remove('hidden');
+            }
+        });
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("🚀 Verification portal loaded");
+        });
+    </script>
+</body>
+</html>

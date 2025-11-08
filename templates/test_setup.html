@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test VYNK Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">VYNK Setup Test</h1>
+        
+        <div class="space-y-4">
+            <button onclick="testBotStatus()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded">
+                Test Bot Status
+            </button>
+            
+            <button onclick="testRoleAssignment()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded">
+                Test Role Assignment
+            </button>
+            
+            <button onclick="testDatabase()" class="bg-purple-500 hover:bg-purple-600 px-4 py-2 rounded">
+                Test Database
+            </button>
+        </div>
+        
+        <div id="results" class="mt-8 p-4 bg-gray-800 rounded"></div>
+    </div>
+
+    <script>
+        async function testBotStatus() {
+            try {
+                const response = await fetch('http://localhost:5001/api/bot-status');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = 
+                    `<pre class="text-green-400">${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<pre class="text-red-400">Error: ${error}</pre>`;
+            }
+        }
+
+        async function testRoleAssignment() {
+            try {
+                const response = await fetch('http://localhost:5001/api/assign-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guild_id: '1427670272118624258',
+                        user_id: '987764845027950602'
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('results').innerHTML = 
+                    `<pre class="text-green-400">${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<pre class="text-red-400">Error: ${error}</pre>`;
+            }
+        }
+
+        async function testDatabase() {
+            try {
+                const response = await fetch('/api/stats/1427670272118624258');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = 
+                    `<pre class="text-green-400">${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = 
+                    `<pre class="text-red-400">Error: ${error}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>
