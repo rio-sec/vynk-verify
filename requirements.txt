@@ -1,4 +1,5 @@
 discord.py
 Flask
-python-dotenv
+Flask-Cors
 requests
+python-dotenv
