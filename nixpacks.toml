@@ -1,2 +1,3 @@
 [entrypoint]
-cmd = "python working_bot_api.py"
+cmd = "python bot.py"
+
