@@ -1,12 +1,2 @@
-[phases.setup]
-commands = [
-    "python3 -m venv /opt/venv",
-    "/opt/venv/bin/pip install --upgrade pip",
-    "/opt/venv/bin/pip install -r requirements.txt"
-]
-
-[phases.setup.environment]
-PATH="/opt/venv/bin:${PATH}"
-
-[start]
+[entrypoint]
 cmd = "python working_bot_api.py"
